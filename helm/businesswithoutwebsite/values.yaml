@@ -9,8 +9,8 @@ imagePullSecrets: []
 frontend:
   replicaCount: 1
   image:
-    repository: 100.93.86.88:30980/businesswithoutwebsite-frontend
-    tag: "latest"
+    repository: ikcloudky6/newbusiness
+    tag: "frontend-latest"
     pullPolicy: Always
   containerPort: 80
   service:
@@ -26,8 +26,8 @@ frontend:
 backend:
   replicaCount: 1
   image:
-    repository: 100.93.86.88:30980/businesswithoutwebsite-backend
-    tag: "latest"
+    repository: ikcloudky6/newbusiness
+    tag: "backend-latest"
     pullPolicy: Always
   containerPort: 5000
   service:

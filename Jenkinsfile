@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY       = '100.93.86.88:30980'
-        BACKEND_IMAGE  = "${REGISTRY}/businesswithoutwebsite-backend"
-        FRONTEND_IMAGE = "${REGISTRY}/businesswithoutwebsite-frontend"
-        IMAGE_TAG      = "${env.GIT_COMMIT[0..6]}"
+        DOCKERHUB_REPO = 'ikcloudky6/newbusiness'
+        BACKEND_TAG    = "backend-${env.GIT_COMMIT[0..6]}"
+        FRONTEND_TAG   = "frontend-${env.GIT_COMMIT[0..6]}"
         NAMESPACE      = 'newb'
         RELEASE_NAME   = 'businesswithoutwebsite'
     }
@@ -30,8 +29,8 @@ pipeline {
                     steps {
                         sh """
                             docker build \
-                              -t ${BACKEND_IMAGE}:${IMAGE_TAG} \
-                              -t ${BACKEND_IMAGE}:latest \
+                              -t ${DOCKERHUB_REPO}:${BACKEND_TAG} \\
+                              -t ${DOCKERHUB_REPO}:backend-latest \\
                               ./backend
                         """
                     }
@@ -39,9 +38,9 @@ pipeline {
                 stage('Frontend') {
                     steps {
                         sh """
-                            docker build \
-                              -t ${FRONTEND_IMAGE}:${IMAGE_TAG} \
-                              -t ${FRONTEND_IMAGE}:latest \
+                            docker build \\
+                              -t ${DOCKERHUB_REPO}:${FRONTEND_TAG} \\
+                              -t ${DOCKERHUB_REPO}:frontend-latest \\
                               ./frontend
                         """
                     }
@@ -50,18 +49,18 @@ pipeline {
         }
 
         stage('Push Images') {
-            parallel {
-                stage('Push Backend') {
-                    steps {
-                        sh "docker push ${BACKEND_IMAGE}:${IMAGE_TAG}"
-                        sh "docker push ${BACKEND_IMAGE}:latest"
-                    }
-                }
-                stage('Push Frontend') {
-                    steps {
-                        sh "docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}"
-                        sh "docker push ${FRONTEND_IMAGE}:latest"
-                    }
+            steps {
+                // dockerhub-credentials -> Jenkins "Username with password" credential
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                    sh "docker push ${BACKEND_IMAGE}:${BACKEND_TAG}"
+                    sh "docker push ${BACKEND_IMAGE}:backend-latest"
+                    sh "docker push ${FRONTEND_IMAGE}:${FRONTEND_TAG}"
+                    sh "docker push ${FRONTEND_IMAGE}:frontend-latest"
                 }
             }
         }
@@ -81,8 +80,10 @@ pipeline {
                         helm upgrade --install ${RELEASE_NAME} ./helm/businesswithoutwebsite \
                           --namespace ${NAMESPACE} \
                           --create-namespace \
-                          --set frontend.image.tag=${IMAGE_TAG} \
-                          --set backend.image.tag=${IMAGE_TAG} \
+                          --set frontend.image.repository=${DOCKERHUB_REPO} \\
+                          --set frontend.image.tag=${FRONTEND_TAG} \\
+                          --set backend.image.repository=${DOCKERHUB_REPO} \\
+                          --set backend.image.tag=${BACKEND_TAG} \\
                           --set backend.secretEnv.GOOGLE_PLACES_API_KEY="\${GOOGLE_KEY}" \
                           --set backend.secretEnv.COMPANIES_HOUSE_API_KEY="\${CH_KEY}" \
                           --set backend.secretEnv.BING_SEARCH_API_KEY="\${BING_KEY}" \
@@ -106,7 +107,7 @@ pipeline {
 
     post {
         success {
-            echo "Deployment ${IMAGE_TAG} to namespace ${NAMESPACE} succeeded."
+            echo "Deployment to namespace ${NAMESPACE} succeeded. Backend: ${BACKEND_TAG}  Frontend: ${FRONTEND_TAG}"
         }
         failure {
             withCredentials([file(credentialsId: 'newb-kubeconfig', variable: 'KUBECONFIG')]) {
@@ -115,9 +116,9 @@ pipeline {
             }
         }
         always {
-            // Clean up local images to save disk space on Jenkins agent
-            sh "docker rmi ${BACKEND_IMAGE}:${IMAGE_TAG}  || true"
-            sh "docker rmi ${FRONTEND_IMAGE}:${IMAGE_TAG} || true"
+            sh "docker rmi ${DOCKERHUB_REPO}:${BACKEND_TAG}  || true"
+            sh "docker rmi ${DOCKERHUB_REPO}:${FRONTEND_TAG} || true"
+            sh 'docker logout || true'
         }
     }
 }
