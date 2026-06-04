@@ -1,0 +1,9 @@
+1. Confirm release resources:
+   kubectl get all -n {{ include "businesswithoutwebsite.namespace" . }}
+
+2. Confirm ingress:
+   kubectl get ingress -n {{ include "businesswithoutwebsite.namespace" . }}
+
+3. App routing:
+   https://{{ .Values.ingress.host }}/      -> frontend
+   https://{{ .Values.ingress.host }}/api   -> backend

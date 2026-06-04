@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "businesswithoutwebsite.fullname" . }}-backend-config
+  namespace: {{ include "businesswithoutwebsite.namespace" . }}
+  labels:
+    {{- include "businesswithoutwebsite.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.backend.env }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

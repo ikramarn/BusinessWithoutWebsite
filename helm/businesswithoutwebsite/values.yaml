@@ -1,0 +1,59 @@
+namespace: newb
+createNamespace: true
+
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullSecrets: []
+
+frontend:
+  replicaCount: 1
+  image:
+    repository: 100.93.86.88:30980/businesswithoutwebsite-frontend
+    tag: "latest"
+    pullPolicy: Always
+  containerPort: 80
+  service:
+    type: ClusterIP
+    port: 80
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+backend:
+  replicaCount: 1
+  image:
+    repository: 100.93.86.88:30980/businesswithoutwebsite-backend
+    tag: "latest"
+    pullPolicy: Always
+  containerPort: 5000
+  service:
+    type: ClusterIP
+    port: 5000
+  env:
+    PORT: "5000"
+    CORS_ORIGIN: "http://app.example.com,https://app.example.com"
+  secretEnv:
+    GOOGLE_PLACES_API_KEY: ""
+    COMPANIES_HOUSE_API_KEY: ""
+    BING_SEARCH_API_KEY: ""
+  resources: {}
+  podAnnotations: {}
+  podLabels: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    # SSE / streaming support - disable response buffering and extend timeouts
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+  host: app.example.com
+  tls:
+    enabled: false
+    secretName: app-example-com-tls

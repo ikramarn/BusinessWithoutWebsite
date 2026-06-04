@@ -1,0 +1,24 @@
+namespace: newb
+createNamespace: true
+
+frontend:
+  image:
+    repository: ghcr.io/your-org/businesswithoutwebsite-frontend
+    tag: "2026.06.04"
+
+backend:
+  image:
+    repository: ghcr.io/your-org/businesswithoutwebsite-backend
+    tag: "2026.06.04"
+  secretEnv:
+    GOOGLE_PLACES_API_KEY: "replace-me"
+    COMPANIES_HOUSE_API_KEY: "replace-me"
+    BING_SEARCH_API_KEY: "replace-me"
+
+ingress:
+  enabled: true
+  className: nginx
+  host: app.yourdomain.com
+  tls:
+    enabled: true
+    secretName: app-yourdomain-com-tls
