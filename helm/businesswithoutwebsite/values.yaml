@@ -35,7 +35,7 @@ backend:
     port: 5000
   env:
     PORT: "5000"
-    CORS_ORIGIN: "http://100.93.86.88"
+    CORS_ORIGIN: "http://100.93.86.88.nip.io"
   secretEnv:
     GOOGLE_PLACES_API_KEY: ""
     COMPANIES_HOUSE_API_KEY: ""
@@ -52,7 +52,7 @@ ingress:
   className: traefik
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
-  host: 100.93.86.88
+  host: 100.93.86.88.nip.io
   tls:
     enabled: false
     secretName: ""
