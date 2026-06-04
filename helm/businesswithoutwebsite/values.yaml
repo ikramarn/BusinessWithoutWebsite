@@ -35,7 +35,7 @@ backend:
     port: 5000
   env:
     PORT: "5000"
-    CORS_ORIGIN: "http://app.example.com,https://app.example.com"
+    CORS_ORIGIN: "http://100.93.86.88"
   secretEnv:
     GOOGLE_PLACES_API_KEY: ""
     COMPANIES_HOUSE_API_KEY: ""
@@ -51,9 +51,8 @@ ingress:
   enabled: true
   className: traefik
   annotations:
-    # SSE / streaming support - disable response buffering and extend timeouts
-    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-  host: app.example.com
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  host: 100.93.86.88
   tls:
     enabled: false
-    secretName: app-example-com-tls
+    secretName: ""

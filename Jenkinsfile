@@ -86,8 +86,7 @@ pipeline {
                           --set backend.image.tag=${BACKEND_TAG} \\
                           --set backend.secretEnv.GOOGLE_PLACES_API_KEY="\${GOOGLE_KEY}" \
                           --set backend.secretEnv.COMPANIES_HOUSE_API_KEY="\${CH_KEY}" \
-                          --set backend.secretEnv.BING_SEARCH_API_KEY="\${BING_KEY}" \
-                          --wait \
+                          --set backend.secretEnv.BING_SEARCH_API_KEY="\${BING_KEY}" \                          --set ingress.tls.enabled=false \                          --wait \
                           --timeout 5m
                     """
                 }
